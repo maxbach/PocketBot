@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/pocket-bot.iml" filepath="$PROJECT_DIR$/.idea/modules/pocket-bot.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/pocket-bot.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/pocket-bot.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/pocket-bot.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/pocket-bot.app.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/pocket-bot.app.test.iml" filepath="$PROJECT_DIR$/.idea/modules/app/pocket-bot.app.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/pocket-bot.main.iml" filepath="$PROJECT_DIR$/.idea/modules/pocket-bot.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/pocket-bot.test.iml" filepath="$PROJECT_DIR$/.idea/modules/pocket-bot.test.iml" />
+    </modules>
+  </component>
+</project>

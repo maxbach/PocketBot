@@ -1,0 +1,19 @@
+apply plugin: 'kotlin'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib"
+    implementation 'io.github.kotlin-telegram-bot.kotlin-telegram-bot:telegram:6.0.4'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'ru.maxbach.pocketbot.MainKt'
+    }
+
+
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+}
