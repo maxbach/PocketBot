@@ -22,5 +22,6 @@ dependencies {
 }
 
 application {
+    applicationDefaultJvmArgs = ["-Xmx512m", "-XX:MaxPermSize=128m"]
     mainClass = 'ru.maxbach.pocketbot.MainKt'
 }
