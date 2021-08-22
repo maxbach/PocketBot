@@ -1,12 +1,23 @@
 apply plugin: 'kotlin'
+apply plugin: 'kotlinx-serialization'
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
+
     implementation 'io.github.kotlin-telegram-bot.kotlin-telegram-bot:telegram:6.0.4'
+
+    implementation "io.ktor:ktor-client-core:1.6.2"
+    implementation "io.ktor:ktor-client-apache:1.6.2"
+
+    implementation "io.ktor:ktor-client-serialization:1.6.2"
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2")
+
+    implementation "io.ktor:ktor-client-logging:1.6.2"
+    implementation "ch.qos.logback:logback-classic:1.2.5"
 }
 
 jar {

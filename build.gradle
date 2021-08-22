@@ -6,23 +6,19 @@ buildscript {
 
 plugins {
     id "org.jetbrains.kotlin.jvm" version "1.5.20"
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.5.20'
 }
 
 allprojects {
     group 'ru.maxbach.pocketbot'
-    version '0.3.4'
+    version '0.0.1'
 
     repositories {
         mavenCentral()
-        jcenter()
         maven { url "https://jitpack.io" }
     }
 }
 
 repositories {
     mavenCentral()
-}
-
-dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib"
 }
