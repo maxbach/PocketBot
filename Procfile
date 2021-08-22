@@ -1,0 +1,1 @@
+web: java -jar build/libs/pocket-bot-0.0.1.jar
