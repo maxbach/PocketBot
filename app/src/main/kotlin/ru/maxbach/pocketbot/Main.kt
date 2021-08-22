@@ -21,6 +21,8 @@ fun main() {
 
     val bot = bot {
 
+        println("Bot has started")
+
         token = "1771639743:AAGNjddjFGT7NC6mhEAr0QdTfWGwyw4_6RA"
 
         dispatch {
