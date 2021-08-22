@@ -22,6 +22,5 @@ dependencies {
 }
 
 application {
-    applicationDefaultJvmArgs = ["-Dserver.port=$PORT"]
     mainClass = 'ru.maxbach.pocketbot.MainKt'
 }
