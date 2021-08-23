@@ -1,1 +1,1 @@
-web: java -jar app/build/libs/pocket_bot.jar
+worker: java -jar app/build/libs/pocket_bot.jar

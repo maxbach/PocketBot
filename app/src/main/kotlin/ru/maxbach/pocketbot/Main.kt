@@ -9,6 +9,7 @@ import com.github.kotlintelegrambot.entities.CallbackQuery
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.InlineKeyboardMarkup
 import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
+import com.github.kotlintelegrambot.logging.LogLevel
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -34,7 +35,7 @@ fun main() {
             message {
                 val chatId = ChatId.fromId(message.chat.id)
 
-                println(message.text)
+                println("Message has came ${message.messageId}")
 
                 when {
                     chatId.id != 179425560L -> {
@@ -56,11 +57,11 @@ fun main() {
                                 chatId = chatId,
                                 text = "А вот какие урлы я нашел",
                                 replyToMessageId = message.messageId,
-                                replyMarkup = InlineKeyboardMarkup.create(buttons = urls.map {
+                                replyMarkup = InlineKeyboardMarkup.create(buttons = urls.mapIndexed { index, url ->
                                     listOf(
                                         InlineKeyboardButton.CallbackData(
-                                            text = it,
-                                            callbackData = Json.encodeToString(CallbackData(it, null))
+                                            text = url,
+                                            callbackData = Json.encodeToString(CallbackData(index, null))
                                         )
                                     )
                                 })
@@ -93,8 +94,15 @@ private fun Bot.login(chatId: ChatId, pocketService: PocketService) {
 private fun Bot.addUrl(pocketService: PocketService, callbackQuery: CallbackQuery) {
     runBlocking {
         val data = Json.decodeFromString<CallbackData>(callbackQuery.data)
-        pocketService.addUrl(data.url)
-        answerCallbackQuery(callbackQuery.id, "${data.url} has added", showAlert = true)
+        val url = callbackQuery.message?.replyMarkup?.inlineKeyboard?.getOrNull(data.index)?.firstOrNull()?.text
+
+        if (url != null) {
+            pocketService.addUrl(url)
+            answerCallbackQuery(callbackQuery.id, "$url has added", showAlert = true)
+        } else {
+            answerCallbackQuery(callbackQuery.id, "Problems with adding. Url is not found", showAlert = true)
+        }
+
     }
 }
 

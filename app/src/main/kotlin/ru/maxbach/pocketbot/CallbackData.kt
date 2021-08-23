@@ -4,6 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CallbackData(
-    val url: String,
+    val index: Int,
     val tag: String? = null
 )
