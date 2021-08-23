@@ -1,1 +1,1 @@
-web: ./gradlew app:run
+web: java -jar app/build/libs/pocket_bot.jar
