@@ -24,7 +24,7 @@ class PocketService {
 
     private val client = HttpClient(Apache) {
         Logging {
-            this.level = LogLevel.BODY
+            this.level = LogLevel.NONE
         }
     }
 
