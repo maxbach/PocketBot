@@ -9,7 +9,6 @@ import com.github.kotlintelegrambot.entities.CallbackQuery
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.InlineKeyboardMarkup
 import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
-import com.github.kotlintelegrambot.logging.LogLevel
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -47,11 +46,15 @@ fun main() {
                     !pocketService.hasAccessToken() -> {
                         bot.login(chatId, pocketService)
                     }
-                    else -> {
+                    message.caption != null || message.text != null -> {
                         val urls = message.getAllUrls()
 
                         if (urls.isEmpty()) {
-                            bot.sendMessage(chatId, "Шото нету тут урлов")
+                            bot.sendMessage(
+                                chatId = chatId,
+                                text = "Шото нету тут урлов",
+                                replyToMessageId = message.messageId,
+                            )
                         } else {
                             bot.sendMessage(
                                 chatId = chatId,
@@ -67,6 +70,9 @@ fun main() {
                                 })
                             )
                         }
+                    }
+                    else -> {
+                        bot.deleteMessage(chatId, message.messageId)
                     }
                 }
             }
@@ -98,9 +104,15 @@ private fun Bot.addUrl(pocketService: PocketService, callbackQuery: CallbackQuer
 
         if (url != null) {
             pocketService.addUrl(url)
-            answerCallbackQuery(callbackQuery.id, "$url has added", showAlert = true)
+            answerCallbackQuery(callbackQuery.id, "$url has added")
+            callbackQuery.message?.let { callbackMessage ->
+                deleteMessage(ChatId.fromId(callbackMessage.chat.id), callbackMessage.messageId)
+                callbackMessage.replyToMessage?.let { replyToMessage ->
+                    deleteMessage(ChatId.fromId(replyToMessage.chat.id), replyToMessage.messageId)
+                }
+            }
         } else {
-            answerCallbackQuery(callbackQuery.id, "Problems with adding. Url is not found", showAlert = true)
+            answerCallbackQuery(callbackQuery.id, "Problems with adding. Url is not found")
         }
 
     }
