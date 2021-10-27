@@ -8,16 +8,18 @@ import com.github.kotlintelegrambot.dispatcher.message
 import com.github.kotlintelegrambot.entities.CallbackQuery
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.InlineKeyboardMarkup
+import com.github.kotlintelegrambot.entities.Message
 import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import ru.maxbach.pocketbot.data.service.PocketService
+import ru.maxbach.pocketbot.data.repo.PocketRepository
+
+private val pocketRepository = PocketRepository()
 
 fun main() {
-
-    val pocketService = PocketService()
 
     val bot = bot {
 
@@ -26,54 +28,15 @@ fun main() {
         token = "1771639743:AAGNjddjFGT7NC6mhEAr0QdTfWGwyw4_6RA"
 
         dispatch {
-
             callbackQuery {
-                bot.addUrl(pocketService, callbackQuery)
+                GlobalScope.launch {
+                    bot.addUrl(callbackQuery.from.id, callbackQuery)
+                }
             }
 
             message {
-                val chatId = ChatId.fromId(message.chat.id)
-
-                println("Message has came ${message.messageId}")
-
-                when {
-                    chatId.id != 179425560L -> {
-                        bot.sendMessage(chatId, "Пшел нафиг, хулиган!")
-                    }
-                    !pocketService.hasRequestToken() -> {
-                        bot.getAuthUrl(chatId, pocketService)
-                    }
-                    !pocketService.hasAccessToken() -> {
-                        bot.login(chatId, pocketService)
-                    }
-                    message.caption != null || message.text != null -> {
-                        val urls = message.getAllUrls()
-
-                        if (urls.isEmpty()) {
-                            bot.sendMessage(
-                                chatId = chatId,
-                                text = "Шото нету тут урлов",
-                                replyToMessageId = message.messageId,
-                            )
-                        } else {
-                            bot.sendMessage(
-                                chatId = chatId,
-                                text = "А вот какие урлы я нашел",
-                                replyToMessageId = message.messageId,
-                                replyMarkup = InlineKeyboardMarkup.create(buttons = urls.mapIndexed { index, url ->
-                                    listOf(
-                                        InlineKeyboardButton.CallbackData(
-                                            text = url,
-                                            callbackData = Json.encodeToString(CallbackData(index, null))
-                                        )
-                                    )
-                                })
-                            )
-                        }
-                    }
-                    else -> {
-                        bot.deleteMessage(chatId, message.messageId)
-                    }
+                GlobalScope.launch {
+                    bot.handleMessage(message)
                 }
             }
         }
@@ -83,38 +46,84 @@ fun main() {
 
 }
 
-private fun Bot.getAuthUrl(chatId: ChatId, pocketService: PocketService) {
-    runBlocking {
-        val authUrl = pocketService.retRequestToken()
-        sendMessage(chatId, "Go to $authUrl and login")
-    }
-}
+private suspend fun Bot.handleMessage(message: Message) {
+    val chatId = ChatId.fromId(message.chat.id)
+    val userId = message.from?.id ?: return
 
-private fun Bot.login(chatId: ChatId, pocketService: PocketService) {
-    runBlocking {
-        val response = pocketService.getAccessToken()
-        sendMessage(chatId, "Hooray! You've logged in, ${response.username} with token ${response.accessToken}")
-    }
-}
+    println("Message has came ${message.messageId}")
 
-private fun Bot.addUrl(pocketService: PocketService, callbackQuery: CallbackQuery) {
-    runBlocking {
-        val data = Json.decodeFromString<CallbackData>(callbackQuery.data)
-        val url = callbackQuery.message?.replyMarkup?.inlineKeyboard?.getOrNull(data.index)?.firstOrNull()?.text
-
-        if (url != null) {
-            pocketService.addUrl(url)
-            answerCallbackQuery(callbackQuery.id, "$url has added")
-            callbackQuery.message?.let { callbackMessage ->
-                deleteMessage(ChatId.fromId(callbackMessage.chat.id), callbackMessage.messageId)
-                callbackMessage.replyToMessage?.let { replyToMessage ->
-                    deleteMessage(ChatId.fromId(replyToMessage.chat.id), replyToMessage.messageId)
-                }
-            }
-        } else {
-            answerCallbackQuery(callbackQuery.id, "Problems with adding. Url is not found")
+    when {
+        chatId.id != 179425560L -> {
+            sendMessage(chatId, "Пшел нафиг, хулиган!")
         }
+        !pocketRepository.hasRequestToken(userId) -> {
+            getAuthUrl(userId, chatId)
+        }
+        !pocketRepository.hasAccessToken(userId) -> {
+            login(userId, chatId)
+        }
+        message.caption != null || message.text != null -> {
+            findUrls(message)
+        }
+        else -> {
+            deleteMessage(chatId, message.messageId)
+        }
+    }
+}
 
+private suspend fun Bot.getAuthUrl(userId: Long, chatId: ChatId) {
+    val authUrl = pocketRepository.getAuthUrl(userId)
+    sendMessage(chatId, "Go to $authUrl and login")
+}
+
+private suspend fun Bot.login(userId: Long, chatId: ChatId) {
+    val response = pocketRepository.login(userId)
+    sendMessage(chatId, "Hooray! You've logged in, ${response.username} with token ${response.accessToken}")
+}
+
+private suspend fun Bot.addUrl(userId: Long, callbackQuery: CallbackQuery) {
+    val data = Json.decodeFromString<CallbackData>(callbackQuery.data)
+    val url = callbackQuery.message?.replyMarkup?.inlineKeyboard?.getOrNull(data.index)?.firstOrNull()?.text
+
+    if (url != null) {
+        pocketRepository.addUrl(userId, url)
+        answerCallbackQuery(callbackQuery.id, "$url has added")
+        callbackQuery.message?.let { callbackMessage ->
+            deleteMessage(ChatId.fromId(callbackMessage.chat.id), callbackMessage.messageId)
+            callbackMessage.replyToMessage?.let { replyToMessage ->
+                deleteMessage(ChatId.fromId(replyToMessage.chat.id), replyToMessage.messageId)
+            }
+        }
+    } else {
+        answerCallbackQuery(callbackQuery.id, "Problems with adding. Url is not found")
+    }
+
+}
+
+private suspend fun Bot.findUrls(message: Message) {
+    val urls = message.getAllUrls()
+    val chatId = ChatId.fromId(message.chat.id)
+
+    if (urls.isEmpty()) {
+        sendMessage(
+            chatId = chatId,
+            text = "Шото нету тут урлов",
+            replyToMessageId = message.messageId,
+        )
+    } else {
+        sendMessage(
+            chatId = chatId,
+            text = "А вот какие урлы я нашел",
+            replyToMessageId = message.messageId,
+            replyMarkup = InlineKeyboardMarkup.create(buttons = urls.mapIndexed { index, url ->
+                listOf(
+                    InlineKeyboardButton.CallbackData(
+                        text = url,
+                        callbackData = Json.encodeToString(CallbackData(index, null))
+                    )
+                )
+            })
+        )
     }
 }
 
