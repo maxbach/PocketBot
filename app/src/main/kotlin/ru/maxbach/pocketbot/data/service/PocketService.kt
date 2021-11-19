@@ -75,9 +75,5 @@ class PocketService {
             }
         }
     }
-
-    companion object {
-        const val DEEPLINK_TAG = "we_have_authed"
-    }
 }
 

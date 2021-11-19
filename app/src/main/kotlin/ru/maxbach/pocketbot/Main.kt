@@ -10,6 +10,7 @@ import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.InlineKeyboardMarkup
 import com.github.kotlintelegrambot.entities.Message
 import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
+import com.github.kotlintelegrambot.logging.LogLevel
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.decodeFromString
@@ -22,6 +23,8 @@ private val pocketRepository = PocketRepository()
 fun main() {
 
     val bot = bot {
+
+        logLevel = LogLevel.Error
 
         println("Bot has started")
 
