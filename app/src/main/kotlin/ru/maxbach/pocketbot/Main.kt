@@ -14,6 +14,7 @@ import com.github.kotlintelegrambot.logging.LogLevel
 import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
+import io.ktor.response.respondText
 import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.routing
@@ -56,20 +57,13 @@ fun main() {
 
     bot.startPolling()
 
-    val env = applicationEngineEnvironment {
-        module {
-            routing {
-                post("/") {
-                    call.respond(HttpStatusCode.OK)
-                }
-                get{
-                    call.respond(HttpStatusCode.OK)
-                }
+    embeddedServer(Netty, port = 8080) {
+        routing {
+            get("/") {
+                call.respondText("Hello, world!")
             }
         }
-    }
-
-    embeddedServer(Netty, env).start(wait = true)
+    }.start(wait = true)
 
 }
 
