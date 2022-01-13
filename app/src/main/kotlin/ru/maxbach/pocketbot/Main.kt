@@ -57,7 +57,7 @@ fun main() {
 
     bot.startPolling()
 
-    embeddedServer(Netty, port = 8080) {
+    embeddedServer(Netty, port = System.getenv("PORT").toInt()) {
         routing {
             get("/") {
                 call.respondText("Hello, world!")
