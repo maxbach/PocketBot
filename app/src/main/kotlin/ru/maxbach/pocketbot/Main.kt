@@ -11,6 +11,14 @@ import com.github.kotlintelegrambot.entities.InlineKeyboardMarkup
 import com.github.kotlintelegrambot.entities.Message
 import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
 import com.github.kotlintelegrambot.logging.LogLevel
+import io.ktor.application.call
+import io.ktor.http.HttpStatusCode
+import io.ktor.response.respond
+import io.ktor.routing.post
+import io.ktor.routing.routing
+import io.ktor.server.engine.applicationEngineEnvironment
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.decodeFromString
@@ -46,6 +54,18 @@ fun main() {
     }
 
     bot.startPolling()
+
+    val env = applicationEngineEnvironment {
+        module {
+            routing {
+                post("/") {
+                    call.respond(HttpStatusCode.OK)
+                }
+            }
+        }
+    }
+
+    embeddedServer(Netty, env).start(wait = true)
 
 }
 
@@ -103,7 +123,7 @@ private suspend fun Bot.addUrl(userId: Long, callbackQuery: CallbackQuery) {
 
 }
 
-private suspend fun Bot.findUrls(message: Message) {
+private fun Bot.findUrls(message: Message) {
     val urls = message.getAllUrls()
     val chatId = ChatId.fromId(message.chat.id)
 
