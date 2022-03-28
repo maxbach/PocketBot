@@ -1,7 +1,5 @@
 # PocketBot - easy way to send articles from Telegram to Pocket
 
-Bot url: [t.me/pocket_maxbach_test_bot](t.me/pocket_maxbach_test_bot)
-
 **Technologies**: Kotlin, Ktor, [kotlin-telegram-bot](https://github.com/kotlin-telegram-bot/kotlin-telegram-bot)
 
 ### What can the bot do?
