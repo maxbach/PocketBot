@@ -2,7 +2,7 @@
 
 **Technologies**: Kotlin, Ktor, [kotlin-telegram-bot](https://github.com/kotlin-telegram-bot/kotlin-telegram-bot)
 
-### What can the bot do?
+### What can the bot do
 
 - auth to pocket
 - find https links in text and hidden urls
